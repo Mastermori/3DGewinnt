@@ -1,24 +1,29 @@
 package com.d3gewinnt.map;
 
 import com.d3gewinnt.Main;
+import de.mathlib.Vector2;
 import de.mathlib.Vector3;
-import processing.core.PApplet;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class Map {
 
-    private static PApplet pa = Main.inst;
+    private static Main pa = Main.inst;
 
     List<Field> fields;
     Vector3 size;
     int winLength;
+    int width, height;
+    Vector2 fieldSize;
 
-    public Map(int xSize, int ySize, int zSize, int winLength) {
+    public Map(int xSize, int ySize, int zSize, int winLength, int width, int height) {
         fields = new ArrayList<>();
         size = new Vector3(xSize, ySize, zSize);
         this.winLength = winLength;
+        this.width = width;
+        this.height = height;
+        fieldSize = new Vector2(width / size.x, height / size.y);
         for (int x = 0; x < size.x; x++) {
             for (int y = 0; y < size.y; y++) {
                 for (int z = 0; z < size.z; z++) {
@@ -28,11 +33,16 @@ public class Map {
         }
     }
 
-    public void draw2D(int x, int y, int width, int height, int layer) {
+    public void draw2D(int x, int y, int layer) {
         pa.noFill();
         pa.stroke(125);
         pa.strokeWeight(2);
-        pa.rect(x, y, width, height);
+        for (int i = 0; i < size.x; i++) {
+            for (int j = 0; j < size.y; j++) {
+                Field f = getField(i, j, layer);
+                f.draw2D(x + i * fieldSize.x, y + j * fieldSize.y, fieldSize);
+            }
+        }
     }
 
     public void draw3D() {
@@ -100,4 +110,11 @@ public class Map {
         return (int) (z + y * size.y + x * size.x * size.y);
     }
 
+    public Vector3 getSize() {
+        return size;
+    }
+
+    public Vector2 getFieldSize() {
+        return fieldSize;
+    }
 }
