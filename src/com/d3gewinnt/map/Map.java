@@ -46,51 +46,82 @@ public class Map {
     }
 
     public void draw3D() {
+        pa.noFill();
+        pa.stroke(255, 0, 0);
+        int fieldSize = 50;
+        pa.pushMatrix();
+        pa.translate(width/2,height/2, 0);
+        float rotX = (Main.rotX / 100.0f)*-2*pa.PI+pa.PI;
+        float rotY = (Main.rotY / 100.0f)*2*pa.PI-pa.PI;
 
-    }
+        /*
+        float rotX = (pa.mouseY/(pa.height*1.0f))*-2*pa.PI+pa.PI;
+        float rotY = (pa.min(pa.mouseX, pa.width/2)/(pa.width/2.0f))*2*pa.PI-pa.PI;
+         */
 
-    public int checkWin() {
-        int winPlayer;
+        pa.rotateX(rotX);
+        pa.rotateY(rotY);
+        //pa.rotateX(pa.map(pa.mouseY, 0, height, 0, 2*pa.PI));
+        //pa.rotateY(pa.map(pa.mouseX, 0, width, 0, 2*pa.PI));
         for (int x = 0; x < size.x; x++) {
             for (int y = 0; y < size.y; y++) {
                 for (int z = 0; z < size.z; z++) {
-                    if((winPlayer = checkFieldWin(new Vector3(x, y, z))) != 0)
-                        return winPlayer;
+                    getField(x, y, z).draw3D((int) ((Math.floor(size.x/2.0) - x) * fieldSize * 2), (int) ((Math.floor(size.y/2.0) - y) * fieldSize * 2), (int) ((Math.floor(size.z/2.0) - z) * fieldSize * 2), fieldSize);
+                }
+            }
+        }
+        pa.popMatrix();
+    }
+
+    public int checkWin() {
+        for (int x = 0; x < size.x; x++) {
+            for (int y = 0; y < size.y; y++) {
+                for (int z = 0; z < size.z; z++) {
+                    if(checkFieldWin(new Vector3(x, y, z)))
+                        return getField(x, y, z).getPlayer();
                 }
             }
         }
         return 0;
     }
 
-    private int checkFieldWin(Vector3 f) {
-        boolean won = false;
+    private boolean checkFieldWin(Vector3 f) {
         int winPlayer = getField(f).getPlayer();
-        won = won || checkRow(f, new Vector3(1, 0, 0), winPlayer);
-        won = won || checkRow(f, new Vector3(0, 1, 0), winPlayer);
-        won = won || checkRow(f, new Vector3(0, 0, 1), winPlayer);
+        if (winPlayer == 0) {
+            return false;
+        }
+        return checkRow(f, new Vector3(1, 0, 0), winPlayer)
+        || checkRow(f, new Vector3(0, 1, 0), winPlayer)
+        || checkRow(f, new Vector3(0, 0, 1), winPlayer)
 
-        won = won || checkRow(f, new Vector3(1, 1, 0), winPlayer);
-        won = won || checkRow(f, new Vector3(1, -1, 0), winPlayer);
+        || checkRow(f, new Vector3(1, 1, 0), winPlayer)
+        || checkRow(f, new Vector3(1, -1, 0), winPlayer)
 
-        won = won || checkRow(f, new Vector3(1, 0, 1), winPlayer);
-        won = won || checkRow(f, new Vector3(1, 0, -1), winPlayer);
+        || checkRow(f, new Vector3(1, 0, 1), winPlayer)
+        || checkRow(f, new Vector3(1, 0, -1), winPlayer)
 
-        won = won || checkRow(f, new Vector3(0, 1, 1), winPlayer);
-        won = won || checkRow(f, new Vector3(0, 1, -1), winPlayer);
+        || checkRow(f, new Vector3(0, 1, 1), winPlayer)
+        || checkRow(f, new Vector3(0, 1, -1), winPlayer)
 
-        won = won || checkRow(f, new Vector3(1, 1, 1), winPlayer);
-        won = won || checkRow(f, new Vector3(1, -1, 1), winPlayer);
-        won = won || checkRow(f, new Vector3(1, 1, -1), winPlayer);
-        won = won || checkRow(f, new Vector3(1, -1, -1), winPlayer);
-
-        return won ? 0 : winPlayer;
+        || checkRow(f, new Vector3(1, 1, 1), winPlayer)
+        || checkRow(f, new Vector3(1, -1, 1), winPlayer)
+        || checkRow(f, new Vector3(1, 1, -1), winPlayer)
+        || checkRow(f, new Vector3(1, -1, -1), winPlayer);
     }
 
     private boolean checkRow(Vector3 f, Vector3 inc, int winPlayer) {
         for (int i = 0; i < winLength; i++) {
-            if(getField(f.x + inc.x * i, f.y + inc.y * i, f.z + inc.z * i).getPlayer() != winPlayer)
+            int fX = (int) (f.x + inc.x * i);
+            int fY = (int) (f.y + inc.y * i);
+            int fZ = (int) (f.z + inc.z * i);
+            if(fX >= size.x || fY >= size.y || fZ >= size.z)
                 return false;
+            Field currF = getField(fX, fY, fZ);
+            if(currF.getPlayer() != winPlayer)
+                return false;
+            System.out.println(i + " " + currF.pos + " " + currF.getPlayer());
         }
+        System.out.println("Winplayer: " + winPlayer + " dir: " + inc);
         return true;
     }
 

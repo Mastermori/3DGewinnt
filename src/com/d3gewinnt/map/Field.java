@@ -22,8 +22,39 @@ public class Field {
         pa.rect(x, y, size.x, size.y);
     }
 
-    public void draw3D(int x, int y, int z) {
+    public void draw3D(int x, int y, int z, int size) {
+        pa.translate(x, y, z);
+        pa.stroke(Main.playerColor[0]);
+        drawBox(size);
+        if(player != 0) {
+            pa.stroke(Main.playerColor[player]);
+            drawCross(size/2);
+        }
+        pa.translate(-x, -y, -z);
+    }
 
+    private void drawCross(int size) {
+        pa.beginShape();
+        pa.vertex(-size, -size, -size);
+        pa.vertex(0, 0, 0);
+        pa.vertex(size, -size, -size);
+        pa.vertex(0, 0, 0);
+        pa.vertex(-size, size, -size);
+        pa.vertex(0, 0, 0);
+        pa.vertex(-size, -size, size);
+        pa.vertex(0, 0, 0);
+        pa.vertex(size, size, -size);
+        pa.vertex(0, 0, 0);
+        pa.vertex(size, -size, size);
+        pa.vertex(0, 0, 0);
+        pa.vertex(-size, size, size);
+        pa.vertex(0, 0, 0);
+        pa.vertex(size, size, size);
+        pa.endShape();
+    }
+
+    private void drawBox(int size) {
+        pa.box(size);
     }
 
 
