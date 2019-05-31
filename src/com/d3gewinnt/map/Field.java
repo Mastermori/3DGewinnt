@@ -22,9 +22,9 @@ public class Field {
         pa.rect(x, y, size.x, size.y);
     }
 
-    public void draw3D(int x, int y, int z, int size) {
+    public void draw3D(int x, int y, int z, int size, int boxColor) {
         pa.translate(x, y, z);
-        pa.stroke(Main.playerColor[0]);
+        pa.stroke(boxColor);
         drawBox(size);
         if(player != 0) {
             pa.stroke(Main.playerColor[player]);

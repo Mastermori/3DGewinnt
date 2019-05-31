@@ -50,7 +50,7 @@ public class Map {
         pa.stroke(255, 0, 0);
         int fieldSize = 50;
         pa.pushMatrix();
-        pa.translate(width/2,height/2, 0);
+        pa.translate(width/4,height/2, (pa.max(size.x, size.y)-3) * -200);
         float rotX = (Main.rotX / 100.0f)*-2*pa.PI+pa.PI;
         float rotY = (Main.rotY / 100.0f)*2*pa.PI-pa.PI;
 
@@ -61,12 +61,13 @@ public class Map {
 
         pa.rotateX(rotX);
         pa.rotateY(rotY);
-        //pa.rotateX(pa.map(pa.mouseY, 0, height, 0, 2*pa.PI));
-        //pa.rotateY(pa.map(pa.mouseX, 0, width, 0, 2*pa.PI));
-        for (int x = 0; x < size.x; x++) {
             for (int y = 0; y < size.y; y++) {
+                for (int x = 0; x < size.x; x++) {
                 for (int z = 0; z < size.z; z++) {
-                    getField(x, y, z).draw3D((int) ((Math.floor(size.x/2.0) - x) * fieldSize * 2), (int) ((Math.floor(size.y/2.0) - y) * fieldSize * 2), (int) ((Math.floor(size.z/2.0) - z) * fieldSize * 2), fieldSize);
+                    getField(x, y, z).draw3D((int) ((Math.floor(size.x/2.0) - x) * fieldSize * 2),
+                            (int) ((Math.floor(size.y/2.0) - y) * fieldSize * 2),
+                            (int) ((Math.floor(size.z/2.0) - z) * fieldSize * 2), (int) (fieldSize*1.8f),
+                            pa.layer == z ? pa.color(50, 150, 50, 100) :  pa.color(200, 200, 200, 70));
                 }
             }
         }
@@ -138,7 +139,7 @@ public class Map {
     }
 
     private int getFieldIndex(int x, int y, int z) {
-        return (int) (z + y * size.y + x * size.x * size.y);
+        return (int) (z + y * size.z + x * size.z * size.y);
     }
 
     public Vector3 getSize() {
