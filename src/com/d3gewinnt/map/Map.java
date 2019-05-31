@@ -3,6 +3,7 @@ package com.d3gewinnt.map;
 import com.d3gewinnt.Main;
 import de.mathlib.Vector2;
 import de.mathlib.Vector3;
+import processing.core.PApplet;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,11 +12,11 @@ public class Map {
 
     private static Main pa = Main.inst;
 
-    List<Field> fields;
-    Vector3 size;
-    int winLength;
-    int width, height;
-    Vector2 fieldSize;
+    private List<Field> fields;
+    private Vector3 size;
+    private int winLength;
+    private int width, height;
+    private Vector2 fieldSize;
 
     public Map(int xSize, int ySize, int zSize, int winLength, int width, int height) {
         fields = new ArrayList<>();
@@ -50,9 +51,9 @@ public class Map {
         pa.stroke(255, 0, 0);
         int fieldSize = 50;
         pa.pushMatrix();
-        pa.translate(width/4,height/2, (pa.max(size.x, size.y)-3) * -200);
-        float rotX = (Main.rotX / 100.0f)*-2*pa.PI+pa.PI;
-        float rotY = (Main.rotY / 100.0f)*2*pa.PI-pa.PI;
+        pa.translate(width / 2 + Main.offX, height / 3*2 + Main.offY, (PApplet.max(size.x, size.y, size.z) - 3) * -fieldSize*2 + Main.offZ);
+        float rotX = (Main.rotX / 100.0f) * -2 * pa.PI + pa.PI;
+        float rotY = (Main.rotY / 100.0f) * 2 * pa.PI - pa.PI;
 
         /*
         float rotX = (pa.mouseY/(pa.height*1.0f))*-2*pa.PI+pa.PI;
@@ -61,13 +62,13 @@ public class Map {
 
         pa.rotateX(rotX);
         pa.rotateY(rotY);
-            for (int y = 0; y < size.y; y++) {
-                for (int x = 0; x < size.x; x++) {
+        for (int y = 0; y < size.y; y++) {
+            for (int x = 0; x < size.x; x++) {
                 for (int z = 0; z < size.z; z++) {
-                    getField(x, y, z).draw3D((int) ((Math.floor(size.x/2.0) - x) * fieldSize * 2),
-                            (int) ((Math.floor(size.y/2.0) - y) * fieldSize * 2),
-                            (int) ((Math.floor(size.z/2.0) - z) * fieldSize * 2), (int) (fieldSize*1.8f),
-                            pa.layer == z ? pa.color(50, 150, 50, 100) :  pa.color(200, 200, 200, 70));
+                    getField(x, y, z).draw3D((size.x / 2.0f - x) * fieldSize * 2 - fieldSize,
+                            (size.y / 2.0f - y) * fieldSize * 2 - fieldSize,
+                            (size.z / 2.0f - z) * fieldSize * 2 - fieldSize, (int) (fieldSize * 1.8f),
+                            Main.layer == z ? pa.color(50, 150, 50, 150) : pa.color(200, 200, 200, 50));
                 }
             }
         }
@@ -78,7 +79,7 @@ public class Map {
         for (int x = 0; x < size.x; x++) {
             for (int y = 0; y < size.y; y++) {
                 for (int z = 0; z < size.z; z++) {
-                    if(checkFieldWin(new Vector3(x, y, z)))
+                    if (checkFieldWin(new Vector3(x, y, z)))
                         return getField(x, y, z).getPlayer();
                 }
             }
@@ -92,22 +93,22 @@ public class Map {
             return false;
         }
         return checkRow(f, new Vector3(1, 0, 0), winPlayer)
-        || checkRow(f, new Vector3(0, 1, 0), winPlayer)
-        || checkRow(f, new Vector3(0, 0, 1), winPlayer)
+                || checkRow(f, new Vector3(0, 1, 0), winPlayer)
+                || checkRow(f, new Vector3(0, 0, 1), winPlayer)
 
-        || checkRow(f, new Vector3(1, 1, 0), winPlayer)
-        || checkRow(f, new Vector3(1, -1, 0), winPlayer)
+                || checkRow(f, new Vector3(1, 1, 0), winPlayer)
+                || checkRow(f, new Vector3(1, -1, 0), winPlayer)
 
-        || checkRow(f, new Vector3(1, 0, 1), winPlayer)
-        || checkRow(f, new Vector3(1, 0, -1), winPlayer)
+                || checkRow(f, new Vector3(1, 0, 1), winPlayer)
+                || checkRow(f, new Vector3(1, 0, -1), winPlayer)
 
-        || checkRow(f, new Vector3(0, 1, 1), winPlayer)
-        || checkRow(f, new Vector3(0, 1, -1), winPlayer)
+                || checkRow(f, new Vector3(0, 1, 1), winPlayer)
+                || checkRow(f, new Vector3(0, 1, -1), winPlayer)
 
-        || checkRow(f, new Vector3(1, 1, 1), winPlayer)
-        || checkRow(f, new Vector3(1, -1, 1), winPlayer)
-        || checkRow(f, new Vector3(1, 1, -1), winPlayer)
-        || checkRow(f, new Vector3(1, -1, -1), winPlayer);
+                || checkRow(f, new Vector3(1, 1, 1), winPlayer)
+                || checkRow(f, new Vector3(1, -1, 1), winPlayer)
+                || checkRow(f, new Vector3(1, 1, -1), winPlayer)
+                || checkRow(f, new Vector3(1, -1, -1), winPlayer);
     }
 
     private boolean checkRow(Vector3 f, Vector3 inc, int winPlayer) {
@@ -115,10 +116,10 @@ public class Map {
             int fX = (int) (f.x + inc.x * i);
             int fY = (int) (f.y + inc.y * i);
             int fZ = (int) (f.z + inc.z * i);
-            if(fX >= size.x || fY >= size.y || fZ >= size.z)
+            if (fX >= size.x || fY >= size.y || fZ >= size.z)
                 return false;
             Field currF = getField(fX, fY, fZ);
-            if(currF.getPlayer() != winPlayer)
+            if (currF.getPlayer() != winPlayer)
                 return false;
             System.out.println(i + " " + currF.pos + " " + currF.getPlayer());
         }

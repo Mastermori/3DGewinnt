@@ -15,14 +15,16 @@ public class Main extends PApplet {
     public static Main inst;
 
     public static int[] playerColor;
-    public static int player;
-    Map map;
+    private static int player;
+    private Map map;
     public static int layer;
 
     private int currWidth, currHeight;
 
     public static float rotX, rotY;
     private static float rotInc;
+
+    public static float offX, offY, offZ;
 
     private static int dragMouseX, dragMouseY;
 
@@ -49,6 +51,19 @@ public class Main extends PApplet {
         KeyboardInput.addBind(new KeyBind("rot-down", new KeyCodeAction(KeyCodeAction.DOWN, KeyEvent.VK_S),
                 (keys) -> rotate(-rotInc, 0)));
 
+        KeyboardInput.addBind(new KeyBind("move-left", new KeyCodeAction(KeyCodeAction.DOWN, KeyEvent.VK_LEFT),
+                (keys) -> move(-1, 0, 0)));
+        KeyboardInput.addBind(new KeyBind("move-right", new KeyCodeAction(KeyCodeAction.DOWN, KeyEvent.VK_RIGHT),
+                (keys) -> move(1, 0, 0)));
+        KeyboardInput.addBind(new KeyBind("move-up", new KeyCodeAction(KeyCodeAction.DOWN, KeyEvent.VK_UP),
+                (keys) -> move(0, -1, 0)));
+        KeyboardInput.addBind(new KeyBind("move-down", new KeyCodeAction(KeyCodeAction.DOWN, KeyEvent.VK_DOWN),
+                (keys) -> move(0, 1, 0)));
+        KeyboardInput.addBind(new KeyBind("move-fwd", new KeyCodeAction(KeyCodeAction.DOWN, KeyEvent.VK_PERIOD),
+                (keys) -> move(0, 0, -1)));
+        KeyboardInput.addBind(new KeyBind("move-bck", new KeyCodeAction(KeyCodeAction.DOWN, KeyEvent.VK_COMMA),
+                (keys) -> move(0, 0, 1)));
+
         registerMethod("pre", this);
 
         reset();
@@ -62,8 +77,8 @@ public class Main extends PApplet {
         }
     }
 
-    public void reset() {
-        map = new Map(5, 5, 5, 3, width / 2 - 10, width / 2 - 10);
+    private void reset() {
+        map = new Map(3, 3, 3, 3, width / 2 - 10, width / 2 - 10);
         layer = 0;
         player = 1;
         rotX = 0;
@@ -77,13 +92,12 @@ public class Main extends PApplet {
         drawRightSide();
     }
 
-    public void drawLeftSide() {
+    private void drawLeftSide() {
         map.draw3D();
     }
 
-    public void drawRightSide() {
-        int fWidth = width / 2 - 10;
-        map.draw2D(width / 2, height / 2 - (fWidth / 2), layer);
+    private void drawRightSide() {
+        map.draw2D(width / 2, height / 2 - (width / 4), layer);
     }
 
     public void keyPressed() {
@@ -92,7 +106,7 @@ public class Main extends PApplet {
             layer = min(layer + 1, (int) map.getSize().z - 1);
         } else if (key == '-' || key == 'e') {
             layer = max(layer - 1, 0);
-        }else if(key == 'r'){
+        } else if (key == 'r') {
             reset();
         }
         if (keyCode >= 129 && keyCode <= 137) {
@@ -108,12 +122,18 @@ public class Main extends PApplet {
         rotY = (rotY + y + 100) % 100;
     }
 
+    private void move(float x, float y, float z) {
+        offX = min(offX + x, width / 2);
+        offY = min(offY + y, height);
+        offZ = offZ + z;
+    }
+
     public void keyReleased() {
         KeyboardInput.registerKeyRelease(keyCode, key);
     }
 
     public void mouseDragged() {
-        if(mouseX < width/2) {
+        if (mouseX < width / 2) {
             rotate(-(dragMouseY - mouseY) * 0.1f, 0);
             rotate(0, (dragMouseX - mouseX) * 0.1f);
         }
@@ -144,14 +164,14 @@ public class Main extends PApplet {
     }
 
     public void mousePressed() {
-        if(mouseX < width/2) {
+        if (mouseX < width / 2) {
             dragMouseX = mouseX;
             dragMouseY = mouseY;
         }
-        if(mouseX > width/2) {
+        if (mouseX > width / 2) {
             if (mouseButton == LEFT) {
                 int fX = (int) ((mouseX - width / 2) / map.getFieldSize().x);
-                int fY = (int) (mouseY / map.getFieldSize().y);
+                int fY = (int) ((mouseY - (height / 2 - (width / 4))) / map.getFieldSize().y);
                 System.out.println("X: " + fX + " Y: " + fY);
                 if (fX >= 0 && fX < map.getSize().x && fY >= 0 && fY < map.getSize().y)
                     makeTurn(fX, fY);
