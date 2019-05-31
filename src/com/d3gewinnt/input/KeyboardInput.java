@@ -81,9 +81,8 @@ public class KeyboardInput {
     /**
      * Needs to be called by the processing draw method. <br>
      * Used to check and call KeyCommands
-     * @param delta time used for calculation
      */
-    public static void update(float delta) {
+    public static void update() {
         updateCommands();
         //After the check, clear the justPressed and justReleased lists so they are only true for one frame
         justPressed.clear();
