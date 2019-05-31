@@ -9,7 +9,7 @@ public class Field {
     private static Main pa = Main.inst;
 
     Vector3 pos;
-    int player;
+    private int player;
 
     public Field(int x, int y, int z) {
         pos = new Vector3(x, y, z);
@@ -22,12 +22,14 @@ public class Field {
         pa.rect(x, y, size.x, size.y);
     }
 
-    public void draw3D(int x, int y, int z, int size, int boxColor) {
+    public void draw3D(float x, float y, float z, int size, int boxColor) {
         pa.translate(x, y, z);
         pa.stroke(boxColor);
+        pa.noFill();
         drawBox(size);
         if(player != 0) {
-            pa.stroke(Main.playerColor[player]);
+            pa.stroke(pa.color(Main.playerColor[player], 100));
+            //drawBox(size);
             drawCross(size/2);
         }
         pa.translate(-x, -y, -z);
@@ -66,12 +68,10 @@ public class Field {
         return player;
     }
 
-    public boolean setPlayer(int player) {
+    public void setPlayer(int player) {
         if (isFree()) {
             this.player = player;
-            return true;
         }
-        return false;
     }
 
 }
