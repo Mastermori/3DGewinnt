@@ -10,8 +10,8 @@ public class KeyCodeAction {
     //Constants used for bitwise calculations
     public static final int DOWN = 1, JUSTDOWN = 2, JUSTUP = 4;
 
-    int[] keyActions;
-    int[] keyCodes;
+    private int[] keyActions;
+    private int[] keyCodes;
 
     public KeyCodeAction(int keyAction, int keyCode) {
         this(new int[]{keyAction}, new int[]{keyCode});
@@ -51,7 +51,7 @@ public class KeyCodeAction {
         }
     }
 
-    protected List<Integer> getKeyCodes() {
+    List<Integer> getKeyCodes() {
         List<Integer> keyCodes = new ArrayList<>(this.keyCodes.length);
         for (int keyCode : this.keyCodes) {
             keyCodes.add(keyCode);

@@ -9,9 +9,9 @@ public class KeyBind {
 
     //---------- VARIABLES ----------
 
-    KeyCodeAction[] keyCodeActions;
-    KeyAction action;
-    String name;
+    private KeyCodeAction[] keyCodeActions;
+    private KeyAction action;
+    private String name;
 
     //---------- CONSTRUCTOR ----------
     public KeyBind(String name, KeyCodeAction keyCodeAction, KeyAction action) {

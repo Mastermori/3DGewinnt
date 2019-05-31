@@ -14,9 +14,6 @@ import java.util.Set;
  */
 public class KeyboardInput {
 
-    //Set local pa to Main.inst so the reference is shorter (can write "pa" instead of "Main.inst"
-    private static Main pa = Main.inst;
-
     //---------- VARIABLES ----------
     //Lists to save keyCodeActions - enables checking keys through methods
     private static Set<Integer> pressed = new HashSet<>();
