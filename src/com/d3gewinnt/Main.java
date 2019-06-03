@@ -359,20 +359,25 @@ public class Main extends PApplet implements Receiver {
         //Split the message into it's components (separator used for communication is ";")
         String[] args = msg.split(";");
         //Check for different msg headers
-        if (args[0].equals("madeTurn")) { //"madeTurn"-header: Another player made a turn -> process that turn
-            setField(Integer.parseInt(args[1]), //X-Position
-                    Integer.parseInt(args[2]), //Y-Position
-                    Integer.parseInt(args[3]), //Z-Position
-                    Integer.parseInt(args[4])); //Player
-        } else if (args[0].equals("playerId")) { //"playerId"-header: Set the player variable to the ID assigned by the server
-            onlinePlayer = Integer.parseInt(args[1]);
-        } else if (args[0].equals("startGame")) { //"startGame"-header: Set the playerColors to the ones received by the server and start the game
-            playerColors = new int[args.length];
-            playerColors[0] = color(200);
-            for (int i = 1; i < args.length; i++) {
-                playerColors[i] = Integer.parseInt(args[i]);
-            }
-            started = true;
+        switch (args[0]) {
+            case "madeTurn":  //"madeTurn"-header: Another player made a turn -> process that turn
+                setField(Integer.parseInt(args[1]), //X-Position
+                        Integer.parseInt(args[2]), //Y-Position
+                        Integer.parseInt(args[3]), //Z-Position
+                        Integer.parseInt(args[4])); //Player
+
+                break;
+            case "playerId":  //"playerId"-header: Set the player variable to the ID assigned by the server
+                onlinePlayer = Integer.parseInt(args[1]);
+                break;
+            case "startGame":  //"startGame"-header: Set the playerColors to the ones received by the server and start the game
+                playerColors = new int[args.length];
+                playerColors[0] = color(200);
+                for (int i = 1; i < args.length; i++) {
+                    playerColors[i] = Integer.parseInt(args[i]);
+                }
+                started = true;
+                break;
         }
     }
 

@@ -172,11 +172,11 @@ public class Map {
         return fields.get(getFieldIndex(x, y, z));
     }
 
-    public Field getField(float x, float y, float z) {
+    private Field getField(float x, float y, float z) {
         return getField((int) x, (int) y, (int) z);
     }
 
-    public Field getField(Vector3 v) {
+    private Field getField(Vector3 v) {
         return getField(v.x, v.y, v.z);
     }
 

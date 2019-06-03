@@ -1,7 +1,5 @@
 package com.d3gewinnt.input;
 
-import com.d3gewinnt.Main;
-
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;

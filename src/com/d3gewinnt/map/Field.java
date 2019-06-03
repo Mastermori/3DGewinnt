@@ -9,11 +9,11 @@ public class Field {
     //---------- VARIABLES ----------
     private static Main pa = Main.inst;
 
-    Vector3 pos;
+    private Vector3 pos;
     private int player;
 
     //---------- CONSTRUCTOR ----------
-    public Field(int x, int y, int z) {
+    Field(int x, int y, int z) {
         pos = new Vector3(x, y, z);
     }
 
@@ -25,7 +25,7 @@ public class Field {
      * @param y position to draw at
      * @param size to draw with (rectangle dimensions)
      */
-    public void draw2D(float x, float y, Vector2 size) {
+    void draw2D(float x, float y, Vector2 size) {
         pa.fill(Main.playerColors[player]);
         pa.rect(x, y, size.x, size.y);
     }
@@ -38,7 +38,7 @@ public class Field {
      * @param size to draw with (box dimensions)
      * @param boxColor outline color (color of the hollow box, not the player mark)
      */
-    public void draw3D(float x, float y, float z, int size, int boxColor) {
+    void draw3D(float x, float y, float z, int size, int boxColor) {
         pa.pushMatrix(); //Push matrix to draw stack - changes made here are restored after popMatrix()
         pa.translate(x, y, z);
         pa.stroke(boxColor);
@@ -87,7 +87,7 @@ public class Field {
     }
 
     //---------- GETTER/SETTER ----------
-    public boolean isFree() {
+    private boolean isFree() {
         return player == 0;
     }
 
