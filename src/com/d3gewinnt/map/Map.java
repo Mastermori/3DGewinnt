@@ -65,6 +65,8 @@ public class Map {
         for (int y = 0; y < size.y; y++) {
             for (int x = 0; x < size.x; x++) {
                 for (int z = 0; z < size.z; z++) {
+                    if(Main.hideLayers && Main.layer != z)
+                        continue;
                     getField(x, y, z).draw3D((size.x / 2.0f - x) * fieldSize * 2 - fieldSize,
                             (size.y / 2.0f - y) * fieldSize * 2 - fieldSize,
                             (size.z / 2.0f - z) * fieldSize * 2 - fieldSize, (int) (fieldSize * 1.8f),
@@ -121,9 +123,7 @@ public class Map {
             Field currF = getField(fX, fY, fZ);
             if (currF.getPlayer() != winPlayer)
                 return false;
-            System.out.println(i + " " + currF.pos + " " + currF.getPlayer());
         }
-        System.out.println("Winplayer: " + winPlayer + " dir: " + inc);
         return true;
     }
 

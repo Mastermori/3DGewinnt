@@ -10,5 +10,6 @@
     <orderEntry type="library" name="GUILib" level="application" />
     <orderEntry type="library" name="MathLib" level="application" />
     <orderEntry type="library" name="Processing" level="project" />
+    <orderEntry type="library" name="NetLib" level="application" />
   </component>
 </module>
