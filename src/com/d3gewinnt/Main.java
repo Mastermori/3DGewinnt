@@ -22,7 +22,7 @@ public class Main extends PApplet implements Receiver {
     //---------- VARIABLES ----------
     public static Main inst;
 
-    public static int[] playerColor;
+    public static int[] playerColors;
     private static int player;
     private Map map;
     public static int layer;
@@ -67,9 +67,12 @@ public class Main extends PApplet implements Receiver {
         rotInc = 0.5f;
 
         //Instantiate the player array with 4 players (Empty, 1, 2, 3) through their colors
-        //playerColor = new int[]{color(200), color(255, 0, 0), color(0, 255, 0), color(0, 0, 255)};
+        playerColors[0] = color(200);
+        for (int i = 1; i < playerColors.length; i++) {
+            playerColors[i] = color(random(255), random(255), random(255));
+        }
 
-        //..... KEYBINDS .....
+        //----- KEYBINDS -----
         //rotation
         KeyboardInput.addBind(new KeyBind("rot-left", new KeyCodeAction(KeyCodeAction.DOWN, KeyEvent.VK_A),
                 (keys) -> rotate(0, rotInc)));
@@ -138,6 +141,7 @@ public class Main extends PApplet implements Receiver {
     public void draw() {
         //Set the background to black
         background(0);
+        strokeWeight(2);
         //If the game has started (server is full)
         if (started) {
             //Update keyPress lists
@@ -240,6 +244,7 @@ public class Main extends PApplet implements Receiver {
 
     /**
      * Rotate the cube around x and y axis
+     *
      * @param x amount to be rotated around the x axis
      * @param y amount to be rotated around the y axis
      */
@@ -250,6 +255,7 @@ public class Main extends PApplet implements Receiver {
 
     /**
      * Moves the cube along the x, y and z axis
+     *
      * @param x amount to be moved along the x axis
      * @param y amount to be moved along the y axis
      * @param z amount to be moved along the z axis
@@ -262,6 +268,7 @@ public class Main extends PApplet implements Receiver {
 
     /**
      * Try to assign the field at the supplied coordinates to the current player, if successful, advance to the next player
+     *
      * @param x coordinate
      * @param y coordinate
      */
@@ -276,10 +283,12 @@ public class Main extends PApplet implements Receiver {
             return;
         //Assign the field to the player
         f.setPlayer(player);
-        //If it's a multiplayer game,
+        //If it's a multiplayer game, send the turn to the other players
         if (client != null)
             client.send(new String[]{"madeTurn", "" + x, "" + y, "" + layer, "" + player}, ";");
-        player = player % (playerColor.length - 1) + 1;
+        //Set the player to be the next in line
+        player = player % (playerColors.length - 1) + 1;
+        //Check if someone won
         int won;
         if ((won = map.checkWin()) != 0) {
             System.out.println("Player " + won + " won!");
@@ -287,10 +296,22 @@ public class Main extends PApplet implements Receiver {
         }
     }
 
+    /**
+     * Assign a field to a player without further checks (used for multiplayer)
+     *
+     * @param x      coordinate
+     * @param y      coordinate
+     * @param layer  z coordinate
+     * @param player to be assigned to the field
+     */
     private void setField(int x, int y, int layer, int player) {
+        //Get the field from the map
         Field f = map.getField(x, y, layer);
+        //Assign the field to the player
         f.setPlayer(player);
-        Main.player = Main.player % (playerColor.length - 1) + 1;
+        //Set the player to be the next in line
+        Main.player = Main.player % (playerColors.length - 1) + 1;
+        //Check if someone won
         int won;
         if ((won = map.checkWin()) != 0) {
             System.out.println("Player " + won + " won!");
@@ -298,88 +319,128 @@ public class Main extends PApplet implements Receiver {
         }
     }
 
+    /**
+     * MousePress method called by the Processing framework whenever a mouse button is pressed
+     */
     public void mousePressed() {
-        if (mouseX < width / 2) {
-            dragMouseX = mouseX;
-            dragMouseY = mouseY;
-        }
-        if (mouseX > width / 2) {
-            if (mouseButton == LEFT) {
-                int fX = (int) ((mouseX - width / 2) / map.getFieldSize().x);
-                int fY = (int) ((mouseY - (height / 2 - (width / 4))) / map.getFieldSize().y);
-                System.out.println("X: " + fX + " Y: " + fY);
-                if (fX >= 0 && fX < map.getSize().x && fY >= 0 && fY < map.getSize().y)
-                    makeTurn(fX, fY);
+        if(started) {
+            //Set the drag position (used for rotation calculations) to the mouse position, if it is on the left side of the screen
+            if (mouseX < width / 2) {
+                dragMouseX = mouseX;
+                dragMouseY = mouseY;
+            }
+            //Only run if the mouse is on the right side of the screen
+            if (mouseX > width / 2) {
+                if (mouseButton == LEFT) {
+                    //Calculate the coordinates of the field in the map with the mouse position
+                    int fX = (int) ((mouseX - width / 2) / map.getFieldSize().x);
+                    int fY = (int) ((mouseY - (height / 2 - (width / 4))) / map.getFieldSize().y);
+                    //If the calculated position is in bounds, try to make a turn on that field
+                    if (fX >= 0 && fX < map.getSize().x && fY >= 0 && fY < map.getSize().y)
+                        makeTurn(fX, fY);
+                }
             }
         }
     }
 
 
     //---------- NETWORKING ----------
+
+    /**
+     * Called by the client whenever he receives a message from the server
+     *
+     * @param msg    the message that was sent by the server
+     * @param client the client this was received by (client-side there is only one, used by the server-side)
+     */
     @Override
-    public void receive(String s, Client client) {
-        System.out.println("Received " + s);
-        String[] args = s.split(";");
-        if (args[0].equals("madeTurn")) {
-            setField(Integer.parseInt(args[1]), Integer.parseInt(args[2]), Integer.parseInt(args[3]), Integer.parseInt(args[4]));
-        } else if (args[0].equals("playerId")) {
+    public void receive(String msg, Client client) {
+        //Debug message for client-server communication
+        System.out.println("Received " + msg);
+        //Split the message into it's components (separator used for communication is ";")
+        String[] args = msg.split(";");
+        //Check for different msg headers
+        if (args[0].equals("madeTurn")) { //"madeTurn"-header: Another player made a turn -> process that turn
+            setField(Integer.parseInt(args[1]), //X-Position
+                    Integer.parseInt(args[2]), //Y-Position
+                    Integer.parseInt(args[3]), //Z-Position
+                    Integer.parseInt(args[4])); //Player
+        } else if (args[0].equals("playerId")) { //"playerId"-header: Set the player variable to the ID assigned by the server
             onlinePlayer = Integer.parseInt(args[1]);
-        } else if (args[0].equals("startGame")) {
-            playerColor = new int[args.length];
-            playerColor[0] = color(200);
-            for(int i = 1; i < args.length; i++){
-                playerColor[i] = Integer.parseInt(args[i]);
+        } else if (args[0].equals("startGame")) { //"startGame"-header: Set the playerColors to the ones received by the server and start the game
+            playerColors = new int[args.length];
+            playerColors[0] = color(200);
+            for (int i = 1; i < args.length; i++) {
+                playerColors[i] = Integer.parseInt(args[i]);
             }
             started = true;
         }
     }
 
+    /**
+     * Constructor called by PApplet.main(...) method -> Sets the static inst variable for usage of non-static processing functions
+     */
     public Main() {
         inst = this;
     }
 
     //---------- PRE-SETUP ----------
+
+    /**
+     * Settings method called by Processing before the setup method
+     */
     public void settings() {
         size(1200, 800, P3D);
         //fullScreen(P3D);
-        smooth(4);
+        smooth(4); //Set Anti-Aliasing to be 4x
     }
 
+    /**
+     * Main method called by JRE on program execution
+     *
+     * @param args command-line arguments supplied by user
+     */
     public static void main(String[] args) {
         PApplet.main("com.d3gewinnt.Main");
-        //playerColor = new int[Integer.parseInt(args[0])];
-        if (args.length > 0 && args[0].equals("-host")) {
+        //playerColors = new int[Integer.parseInt(args[0])];
+        if (args.length > 0 && args[0].equals("-host")) { //Command-line syntax: "java -jar 3DGewinnt.jar -host [por] [playerCount]
             int port = Integer.parseInt(args[1]);
-            host = new EchoServer(Integer.parseInt(args[1]), Integer.parseInt(args[2])) {
+            //Create the custom EchoServer (sends playerId onConnect and startGame onFull)
+            host = new EchoServer(Integer.parseInt(args[1]), //Port
+                    Integer.parseInt(args[2]) //Player count
+            ) {
                 @Override
-                protected void onClientConnect(Client client) {
-                    client.send(new String[]{"playerId", "" + clients.size()}, ";");
-                    if (isFull()) {
+                protected void onClientConnect(Client client) { //Override onClientConnect event
+                    super.onClientConnect(client);
+                    client.send(new String[]{"playerId", "" + clients.size()}, ";"); //Send the playerId to the connected client
+                    if (isFull()) { //If the server is full, generate random colors for all players and send them
                         List<String> colors = new LinkedList<>();
-                        colors.add("startGame");
-                        for(int i = 0; i < clients.size(); i++) {
+                        colors.add("startGame"); //colors is directly converted to the msg array so the header needs to be added first
+                        for (int i = 0; i < clients.size(); i++) {
                             Random r = new Random();
                             colors.add("" + inst.color(r.nextInt(255), r.nextInt(255), r.nextInt(255)));
                         }
-                        clients.forEach((c) -> c.send(colors.toArray(new String[0]), ";"));
+                        clients.forEach((c) -> c.send(colors.toArray(new String[0]), ";")); //Send the player colors to all players
                     }
                 }
             };
             try {
-                client = new Client("127.0.0.1", port, inst);
+                client = new Client("127.0.0.1", port, inst); //Create local client
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        } else if (args.length > 0 && args[0].equals("-join")) {
+        } else if (args.length > 0 && args[0].equals("-join")) { //Command-line syntax: "java -jar 3DGewinnt.jar -join [ip] [port]
             try {
-                client = new Client(args[1], Integer.parseInt(args[2]), inst);
+                //Create client (connects to server automatically)
+                client = new Client(args[1], //IP
+                        Integer.parseInt(args[2]), //Port
+                        inst); //Receiver
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        } else {
-            onlinePlayer = 0;
-            playerColor = new int[]{inst.color(200), inst.color(255, 0, 0), inst.color(0, 255, 0), inst.color(0, 0, 255)};
-            started = true;
+        } else { //If you don't host or join a server, you create a hotseat game (non-online) with 3 players
+            onlinePlayer = 0; //Set the onlinePlayer (the player you represent when playing online) to 0 to make it a hotseat game
+            playerColors = new int[(args.length == 1 ? Integer.parseInt(args[0]) : 3) + 1];
+            started = true; //Start the game
         }
     }
 

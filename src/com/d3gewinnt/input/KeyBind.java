@@ -28,7 +28,9 @@ public class KeyBind {
         this.action = action;
     }
 
-
+    /**
+     * Checks the action conditions and executes the action if they are fulfilled
+     */
     public void checkAction() {
         for (KeyCodeAction keyCodeAction : keyCodeActions) {
             if(keyCodeAction.isFulfilled()) {
@@ -38,6 +40,10 @@ public class KeyBind {
         }
     }
 
+    /**
+     * Returns an array of all keyCodes involved in any action with any condition
+     * @return keyCode array
+     */
     private int[] getKeyCodes() {
         List<Integer> keyCodes = new LinkedList<>();
         for (KeyCodeAction keyCodeAction : keyCodeActions) {
