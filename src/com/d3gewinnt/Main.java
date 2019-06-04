@@ -181,9 +181,9 @@ public class Main extends PApplet implements Receiver {
             //Register the key press for the KeyBinds
             KeyboardInput.registerKeyPress(keyCode, key);
             //Process unbound key presses (can't be bound with KeyEvent - keyCodes don't match)
-            if (key == '+' || key == 'q') {
+            if (key == '+' || key == 'e') {
                 layer = min(layer + 1, (int) map.getSize().z - 1);
-            } else if (key == '-' || key == 'e') {
+            } else if (key == '-' || key == 'q') {
                 layer = max(layer - 1, 0);
             }
             //Process numpad keyEvents
