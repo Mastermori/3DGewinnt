@@ -41,9 +41,11 @@ public class Field {
     void draw3D(float x, float y, float z, int size, int boxColor) {
         pa.pushMatrix(); //Push matrix to draw stack - changes made here are restored after popMatrix()
         pa.translate(x, y, z);
-        pa.stroke(boxColor);
-        pa.noFill();
-        drawBox(size); //Draw the outline (box)
+        if(!Main.hideBoxes) {
+            pa.stroke(boxColor);
+            pa.noFill();
+            drawBox(size); //Draw the outline (box)
+        }
         if(player != 0) { //If the field is not empty, draw a player mark in it
             pa.strokeWeight(3);
             pa.stroke(pa.color(Main.playerColors[player], 100));

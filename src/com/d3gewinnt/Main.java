@@ -5,6 +5,8 @@ import com.d3gewinnt.input.KeyCodeAction;
 import com.d3gewinnt.input.KeyboardInput;
 import com.d3gewinnt.map.Field;
 import com.d3gewinnt.map.Map;
+import ddf.minim.AudioPlayer;
+import ddf.minim.Minim;
 import de.net.client.Client;
 import de.net.interfaces.Receiver;
 import de.net.server.EchoServer;
@@ -13,6 +15,7 @@ import processing.event.MouseEvent;
 
 import java.awt.event.KeyEvent;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
@@ -26,7 +29,7 @@ public class Main extends PApplet implements Receiver {
     private static int player;
     private Map map;
     public static int layer;
-    public static boolean hideLayers;
+    public static boolean hideLayers, hideBoxes;
 
     private static int onlinePlayer;
 
@@ -44,6 +47,10 @@ public class Main extends PApplet implements Receiver {
 
     private static int dragMouseX, dragMouseY;
 
+    private static List<AudioPlayer> songs;
+    private static AudioPlayer currentSong;
+    private static Minim minim;
+
     //---------- SETUP ----------
 
     /**
@@ -59,6 +66,15 @@ public class Main extends PApplet implements Receiver {
         textAlign(CENTER);
         textSize(40);
 
+        songs = new ArrayList<>();
+        minim = new Minim(this);
+
+        for (int i = 1; i <= 12; i++) {
+            songs.add(minim.loadFile("song" + i + ".mp3"));
+        }
+
+        currentSong = songs.get(0);
+
         //Set the current dimensions of the window for resizing
         currWidth = width;
         currHeight = height;
@@ -67,10 +83,7 @@ public class Main extends PApplet implements Receiver {
         rotInc = 0.5f;
 
         //Instantiate the player array with 4 players (Empty, 1, 2, 3) through their colors
-        playerColors[0] = color(200);
-        for (int i = 1; i < playerColors.length; i++) {
-            playerColors[i] = color(random(255), random(255), random(255));
-        }
+        randomizeColors();
 
         //----- KEYBINDS -----
         //rotation
@@ -78,9 +91,9 @@ public class Main extends PApplet implements Receiver {
                 (keys) -> rotate(0, rotInc)));
         KeyboardInput.addBind(new KeyBind("rot-right", new KeyCodeAction(KeyCodeAction.DOWN, KeyEvent.VK_D),
                 (keys) -> rotate(0, -rotInc)));
-        KeyboardInput.addBind(new KeyBind("rot-up", new KeyCodeAction(KeyCodeAction.DOWN, KeyEvent.VK_W),
+        KeyboardInput.addBind(new KeyBind("rot-up", new KeyCodeAction(KeyCodeAction.DOWN, KeyEvent.VK_S),
                 (keys) -> rotate(rotInc, 0)));
-        KeyboardInput.addBind(new KeyBind("rot-down", new KeyCodeAction(KeyCodeAction.DOWN, KeyEvent.VK_S),
+        KeyboardInput.addBind(new KeyBind("rot-down", new KeyCodeAction(KeyCodeAction.DOWN, KeyEvent.VK_W),
                 (keys) -> rotate(-rotInc, 0)));
 
         //movement
@@ -104,6 +117,12 @@ public class Main extends PApplet implements Receiver {
                 (keys) -> hideLayers = !hideLayers));
         KeyboardInput.addBind(new KeyBind("reset-game", new KeyCodeAction(KeyCodeAction.JUSTDOWN, KeyEvent.VK_R),
                 (keys) -> reset()));
+        KeyboardInput.addBind(new KeyBind("hide-boxes", new KeyCodeAction(KeyCodeAction.JUSTDOWN, KeyEvent.VK_X),
+                (keys) -> hideBoxes = !hideBoxes));
+        KeyboardInput.addBind(new KeyBind("reroll-colors", new KeyCodeAction(KeyCodeAction.JUSTDOWN, KeyEvent.VK_C),
+                (keys) -> randomizeColors()));
+        KeyboardInput.addBind(new KeyBind("next-song", new KeyCodeAction(KeyCodeAction.JUSTDOWN, KeyEvent.VK_N),
+                (keys) -> randomSong()));
 
 
         //Register "pre" method to be run by processing (for resizing)
@@ -119,6 +138,13 @@ public class Main extends PApplet implements Receiver {
             reset();
             currWidth = width;
             currHeight = height;
+        }
+    }
+
+    private void randomizeColors(){
+        playerColors[0] = color(200);
+        for (int i = 1; i < playerColors.length; i++) {
+            playerColors[i] = color(random(255), random(255), random(255));
         }
     }
 
@@ -144,6 +170,8 @@ public class Main extends PApplet implements Receiver {
         strokeWeight(2);
         //If the game has started (server is full)
         if (started) {
+            if(!currentSong.isPlaying())
+                randomSong();
             //Update keyPress lists
             KeyboardInput.update();
             //Draw the two sides of the screen
@@ -341,6 +369,20 @@ public class Main extends PApplet implements Receiver {
                 }
             }
         }
+    }
+
+    private void playSong(int id){
+        if(currentSong.isPlaying())
+            currentSong.pause();
+        currentSong = songs.get(id);
+        currentSong.rewind();
+        currentSong.play();
+    }
+
+    private void randomSong() {
+        int rand = (int) random(songs.size());
+        playSong(rand);
+        System.out.println("Next song: " + rand);
     }
 
 
